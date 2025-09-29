@@ -1,0 +1,79 @@
+<html>
+
+<head>
+    <link type="text/css" rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+
+<body>
+    <button id="resetButton">Reset Map</button>
+    <div>Click on the map to draw a circle. Default radius is 200m. You can change the radius (in nautical miles) using the input box below.</div>
+    <input type="number" id="radiusInput" placeholder="Enter radius in nautical miles" />
+    <div>Enter a point to add point to the map</div>
+    -41°<input placeholder="degrees latitude" type="number" id="latInput" value="16.1" />S<br>
+    174°<input placeholder="degrees longitude" type="number" id="lngInput" value="51.7" />E
+    <button id="addPointButton">Add Point</button>
+    <div id="map"></div>
+    <script>
+        var map = L.map('map').setView([-41.272361, 174.820503], 13);
+
+        L.tileLayer('https://tiles-cdn.koordinates.com/services;key=5fa5770c21c14ae49a47a42a805f7c88/tiles/v4/set=4758/EPSG:3857/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        var circles = [];
+
+        document.getElementById('resetButton').onclick = function() {
+            circles.forEach(function(circle) {
+                circle.remove();
+            });
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+            map.setView([-41.272361, 174.820503], 13);
+        };
+        
+        function dmsToDecimal(degrees, minutes, direction) {
+            var decimal = degrees + minutes / 60;
+            if (direction === "S" || direction === "W") {
+                decimal *= -1;
+            }
+            return decimal;
+        }
+
+        document.getElementById('addPointButton').onclick = function() {
+            var lat = dmsToDecimal(41, parseFloat(document.getElementById('latInput').value), "S");
+            var lng = dmsToDecimal(174, parseFloat(document.getElementById('lngInput').value), "E");
+            alert(lat);
+            alert(lng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                L.marker([lat, lng]).addTo(map);
+                map.setView([lat, lng], 13);
+            } else {
+                alert("Please enter valid latitude and longitude values.");
+            }
+        };
+
+        function convertRadiusToMeters(radius) {
+            var nauticalMiles = radius; // Assuming input is in nautical miles
+            var meters = nauticalMiles * 1852; // Convert nautical miles to meters
+            return meters;
+        }
+        
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+            var radius = document.getElementById('radiusInput').value || .11; // Default radius in nautical miles
+
+            var circle = L.circle([lat,lng], convertRadiusToMeters(radius)).addTo(map);
+            circles.push(circle);
+        });
+    </script>
+</body>
+
+</html>
