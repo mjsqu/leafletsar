@@ -49,8 +49,6 @@
         document.getElementById('addPointButton').onclick = function() {
             var lat = dmsToDecimal(41, parseFloat(document.getElementById('latInput').value), "S");
             var lng = dmsToDecimal(174, parseFloat(document.getElementById('lngInput').value), "E");
-            alert(lat);
-            alert(lng);
             if (!isNaN(lat) && !isNaN(lng)) {
                 L.marker([lat, lng]).addTo(map);
                 map.setView([lat, lng], 13);
